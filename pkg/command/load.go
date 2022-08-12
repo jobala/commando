@@ -10,12 +10,12 @@ import (
 /*
     Test add command
 **/
-func AddCommand[T any](cmdName string, handlerFunc func(args T)) *argparse.Command {
+func AddCommand[T any](cmdName string, handlerFunc func(args T), parser *argparse.Command) *argparse.Command {
 	// create command,
 	// Reflect on T to add arguments
 	// Add command
 
-	cmd := Parser.NewCommand(cmdName, "A description")
+	cmd := parser.NewCommand(cmdName, "A description")
 	parsedArgs := make(map[string]interface{})
 
 	var f T
@@ -45,19 +45,38 @@ func AddCommand[T any](cmdName string, handlerFunc func(args T)) *argparse.Comma
 	return cmd
 }
 
-type CommandGroup struct {
-	parent *argparse.Command
-}
-
-func AddCommandGroup(group, description string) *CommandGroup {
-	parent := Parser.NewCommand(group, description)
-	return &CommandGroup{
-		parent: parent,
+func NewCommand[T any](cmdName string, handlerFunc func(args T)) UserCmdr {
+	return &UserCmd[T]{
+		Name:    cmdName,
+		Handler: handlerFunc,
 	}
 }
 
-func (g CommandGroup) WithCommand(cmdName string, handlerFunc func(args any)) {
-	AddCommand(cmdName, handlerFunc)
+func (c *UserCmd[T]) Load(cmdGrp *CommandGroup) *CommandGroup {
+	AddCommand(c.Name, c.Handler, cmdGrp.Parent)
+	return cmdGrp
+}
+
+func (cg *CommandGroup) WithCommand(cmd UserCmdr) *CommandGroup {
+	cmd.Load(cg)
+	return cg
+}
+
+func NewCommandGroup(name, desc string) *CommandGroup {
+	return &CommandGroup{Parent: Parser.NewCommand(name, desc)}
+}
+
+type UserCmdr interface {
+	Load(*CommandGroup) *CommandGroup
+}
+
+type CommandGroup struct {
+	Parent *argparse.Command
+}
+
+type UserCmd[T any] struct {
+	Name    string
+	Handler func(args T)
 }
 
 type CMD interface {

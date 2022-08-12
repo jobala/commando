@@ -13,14 +13,9 @@ TODO
     2. Make project a Go package
 */
 func main() {
-
-	animals := command.CommandGroup("animals")
-	animals.WithCommand()
-	animals.WithCommand()
-	animals.WithCommand()
-
-	cat := command.AddCommand("cat", Meow)
-	command.AddCommand("cow", Cow)
+	command.NewCommandGroup("animals", "animals you may know").
+		WithCommand(command.NewCommand("cat", Meow)).
+		WithCommand(command.NewCommand("cow", Cow))
 
 	err := command.Parser.Parse(os.Args)
 	if err != nil {

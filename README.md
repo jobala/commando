@@ -1,2 +1,2 @@
 # commando
-Another Go CLI framework
+An elegant CLI framework 
