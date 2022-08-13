@@ -45,13 +45,6 @@ func AddCommand[T any](cmdName string, handlerFunc func(args T), parser *argpars
 	return cmd
 }
 
-func NewCommand[T any](cmdName string, handlerFunc func(args T)) UserCmdr {
-	return &UserCmd[T]{
-		Name:    cmdName,
-		Handler: handlerFunc,
-	}
-}
-
 func (c *UserCmd[T]) Load(cmdGrp *CommandGroup) *CommandGroup {
 	AddCommand(c.Name, c.Handler, cmdGrp.Parent)
 	return cmdGrp
@@ -60,10 +53,6 @@ func (c *UserCmd[T]) Load(cmdGrp *CommandGroup) *CommandGroup {
 func (cg *CommandGroup) WithCommand(cmd UserCmdr) *CommandGroup {
 	cmd.Load(cg)
 	return cg
-}
-
-func NewCommandGroup(name, desc string) *CommandGroup {
-	return &CommandGroup{Parent: Parser.NewCommand(name, desc)}
 }
 
 type UserCmdr interface {
