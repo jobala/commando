@@ -2,7 +2,6 @@ package command
 
 import (
 	"encoding/json"
-	"fmt"
 )
 
 func (c Command[T]) Execute() {
@@ -10,8 +9,6 @@ func (c Command[T]) Execute() {
 
 	jsonStr, _ := json.Marshal(c.args)
 	json.Unmarshal([]byte(jsonStr), &arg)
-
-	fmt.Println(string(jsonStr))
 
 	c.handlerFunc(arg)
 }

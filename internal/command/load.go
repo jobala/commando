@@ -7,6 +7,8 @@ import (
 	"github.com/akamensky/argparse"
 )
 
+var CommandTable = make([]CommandItem, 0)
+
 func (cg *CommandGroup) WithCommand(cmd UserCmdr) *CommandGroup {
 	cmd.Add(cg)
 	return cg
@@ -88,5 +90,3 @@ type CommandItem struct {
 }
 
 type Handler[T any] func(args T)
-
-var CommandTable = make([]CommandItem, 0)
