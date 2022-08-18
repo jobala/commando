@@ -7,60 +7,67 @@ import (
 	"github.com/akamensky/argparse"
 )
 
-/*
-    Test add command
-**/
-func AddCommand[T any](cmdName string, handlerFunc func(args T), parser *argparse.Command) *argparse.Command {
-	// create command,
-	// Reflect on T to add arguments
-	// Add command
-
-	cmd := parser.NewCommand(cmdName, "A description")
-	parsedArgs := make(map[string]interface{})
-
-	var f T
-
-	ft := reflect.TypeOf(f)
-	for i := 0; i < ft.NumField(); i++ {
-		curField := ft.Field(i)
-
-		switch curField.Type.Name() {
-		case "int":
-			parsedArgs[strings.ToLower(curField.Name)] = cmd.Int("", strings.ToLower(curField.Name), nil)
-		case "string":
-			parsedArgs[strings.ToLower(curField.Name)] = cmd.String("", strings.ToLower(curField.Name), nil)
-		}
-	}
-
-	cmdObj := Command[T]{
-		args:        parsedArgs,
-		handlerFunc: handlerFunc,
-	}
-
-	CommandTable = append(CommandTable, CommandItem{
-		Cmd:      cmd,
-		Executor: cmdObj,
-	})
-
-	return cmd
-}
-
-func (c *UserCmd[T]) Load(cmdGrp *CommandGroup) *CommandGroup {
-	AddCommand(c.Name, c.Handler, cmdGrp.Parent)
-	return cmdGrp
-}
-
 func (cg *CommandGroup) WithCommand(cmd UserCmdr) *CommandGroup {
-	cmd.Load(cg)
+	cmd.Add(cg)
 	return cg
 }
 
-type UserCmdr interface {
-	Load(*CommandGroup) *CommandGroup
+func (c *UserCmd[T]) Add(cmdGroup *CommandGroup) *CommandGroup {
+	addCommandToGroup(c.Name, c.Handler, cmdGroup.Group)
+	return cmdGroup
+}
+
+func addCommandToGroup[T any](cmdName string, handlerFunc Handler[T], group *argparse.Command) *argparse.Command {
+	cmd := createNewCommand(cmdName, "A command", group)
+	args := getCmdArgsFromHandler(handlerFunc)
+	addArgsToCmd(args, cmd)
+
+	cliCmd := Command[T]{
+		args:        args,
+		handlerFunc: handlerFunc,
+	}
+
+	addCmdToTable[T](cmd, cliCmd)
+	return cmd
+}
+
+func createNewCommand(name, description string, group *argparse.Command) *argparse.Command {
+	return group.NewCommand(name, description)
+}
+
+func addArgsToCmd(args map[string]any, cmd *argparse.Command) {
+	for field, dataType := range args {
+		switch dataType {
+		case "int":
+			args[field] = cmd.Int("", field, nil)
+		case "string":
+			args[field] = cmd.String("", field, nil)
+		}
+	}
+}
+
+func getCmdArgsFromHandler[T any](handlerFunc Handler[T]) map[string]any {
+	var argStruct T
+	args := make(map[string]any)
+
+	argReflection := reflect.TypeOf(argStruct)
+	for i := 0; i < argReflection.NumField(); i++ {
+		curField := argReflection.Field(i)
+		field := strings.ToLower(curField.Name)
+		args[field] = curField.Type.Name()
+	}
+	return args
+}
+
+func addCmdToTable[T any](cmd *argparse.Command, cliCmd CMD) {
+	CommandTable = append(CommandTable, CommandItem{
+		Cmd:      cmd,
+		Executor: cliCmd,
+	})
 }
 
 type CommandGroup struct {
-	Parent *argparse.Command
+	Group *argparse.Command
 }
 
 type UserCmd[T any] struct {
@@ -68,8 +75,8 @@ type UserCmd[T any] struct {
 	Handler func(args T)
 }
 
-type CMD interface {
-	Execute()
+type UserCmdr interface {
+	Add(*CommandGroup) *CommandGroup
 }
 
 type CommandItem struct {
@@ -77,5 +84,6 @@ type CommandItem struct {
 	Executor CMD
 }
 
-var Parser = argparse.NewParser("mg", "A new CLI")
+type Handler[T any] func(args T)
+
 var CommandTable = make([]CommandItem, 0)

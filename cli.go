@@ -12,7 +12,7 @@ import (
 TODO
     1. Increase the number of supported arguments
     2. Help Information
-    3. Improve command table lookup time
+    3. Improve command table lookup time complexity
 */
 func NewCli(name, description string) *cli {
 	return &cli{
@@ -34,7 +34,7 @@ func (c *cli) Invoke(args []string) {
 }
 
 func (c *cli) NewCommandGroup(name, desc string) *command.CommandGroup {
-	return &command.CommandGroup{Parent: c.parser.NewCommand(name, desc)}
+	return &command.CommandGroup{Group: c.parser.NewCommand(name, desc)}
 }
 
 func Command[T any](cmdName string, handlerFunc func(args T)) command.UserCmdr {
