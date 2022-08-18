@@ -17,38 +17,26 @@ func (c *UserCmd[T]) Add(cmdGroup *CommandGroup) *CommandGroup {
 	return cmdGroup
 }
 
-func addCommandToGroup[T any](cmdName string, handlerFunc Handler[T], group *argparse.Command) *argparse.Command {
+func addCommandToGroup[T any](cmdName string, handlerFunc Handler[T], group *argparse.Command) {
 	cmd := createNewCommand(cmdName, "A command", group)
 	args := getCmdArgsFromHandler(handlerFunc)
-	addArgsToCmd(args, cmd)
+	cmdArgs := addArgsToCmd(args, cmd)
 
 	cliCmd := Command[T]{
-		args:        args,
+		args:        cmdArgs,
 		handlerFunc: handlerFunc,
 	}
 
 	addCmdToTable[T](cmd, cliCmd)
-	return cmd
 }
 
 func createNewCommand(name, description string, group *argparse.Command) *argparse.Command {
 	return group.NewCommand(name, description)
 }
 
-func addArgsToCmd(args map[string]any, cmd *argparse.Command) {
-	for field, dataType := range args {
-		switch dataType {
-		case "int":
-			args[field] = cmd.Int("", field, nil)
-		case "string":
-			args[field] = cmd.String("", field, nil)
-		}
-	}
-}
-
-func getCmdArgsFromHandler[T any](handlerFunc Handler[T]) map[string]any {
+func getCmdArgsFromHandler[T any](handlerFunc Handler[T]) map[string]string {
 	var argStruct T
-	args := make(map[string]any)
+	args := make(map[string]string)
 
 	argReflection := reflect.TypeOf(argStruct)
 	for i := 0; i < argReflection.NumField(); i++ {
@@ -57,6 +45,21 @@ func getCmdArgsFromHandler[T any](handlerFunc Handler[T]) map[string]any {
 		args[field] = curField.Type.Name()
 	}
 	return args
+}
+
+func addArgsToCmd(args map[string]string, cmd *argparse.Command) map[string]any {
+	cmdArgs := make(map[string]any)
+
+	for field, dataType := range args {
+		switch dataType {
+		case "int":
+			cmdArgs[field] = cmd.Int("", field, nil)
+		case "string":
+			cmdArgs[field] = cmd.String("", field, nil)
+		}
+	}
+
+	return cmdArgs
 }
 
 func addCmdToTable[T any](cmd *argparse.Command, cliCmd CMD) {
