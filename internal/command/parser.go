@@ -16,22 +16,20 @@ func getSubParser(group string, parser *argparse.Parser) *argparse.Command {
 	}
 
 	groups := strings.Split(group, " ")
-
 	grp := groups[0]
 
 	var currCmd *argparse.Command
+
 	if subParser, ok := subParsers[grp]; ok {
 		currCmd = subParser
 	} else {
 		currCmd = parser.NewCommand(grp, "")
-
+		subParsers[grp] = currCmd
 	}
-
-	subParsers[grp] = currCmd
 
 	for i := 1; i < len(groups); i++ {
 		grp += " " + groups[i]
-		currCmd = currCmd.NewCommand(grp, "")
+		currCmd = currCmd.NewCommand(groups[i], "")
 		subParsers[grp] = currCmd
 	}
 
