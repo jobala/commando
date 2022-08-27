@@ -8,15 +8,10 @@ import (
 	"github.com/jobala/commando/internal/command"
 )
 
-/**
-TODO
-    1. Increase the number of supported arguments
-    2. Help Information
-    3. Improve command table lookup time complexity
-*/
 func NewCli(name, description string) *cli {
 	return &cli{
-		parser: argparse.NewParser(name, description),
+		parser:       argparse.NewParser(name, description),
+		currentGroup: "",
 	}
 }
 
@@ -26,24 +21,34 @@ func (c *cli) Invoke(args []string) {
 		fmt.Println(err)
 	}
 
-	for _, cmdItem := range command.CommandTable {
-		if cmdItem.Cmd.Happened() {
-			cmdItem.Executor.Execute()
+	for _, cmd := range command.CommandList {
+		if cmd.Cmd.Happened() {
+			cmd.Executor.Execute()
 		}
 	}
 }
 
-func (c *cli) NewCommandGroup(name, desc string) *command.CommandGroup {
-	return &command.CommandGroup{Group: c.parser.NewCommand(name, desc)}
+func (c *cli) NewCommandGroup(name string) *cli {
+	c.currentGroup = name
+	return c
 }
 
-func Command[T any](cmdName string, handlerFunc func(args T)) command.UserCmdr {
-	return &command.UserCmd[T]{
+func (c *cli) WithCommand(cmd command.Loader) *cli {
+	cmd.Load(c.currentGroup, c.parser)
+	return c
+}
+
+func Command[T any](cmdName string, handlerFunc func(args T)) command.Loader {
+	return command.CliCommand[T]{
 		Name:    cmdName,
 		Handler: handlerFunc,
 	}
 }
 
 type cli struct {
-	parser *argparse.Parser
+	parser       *argparse.Parser
+	currentGroup string
+}
+
+type cliCommand interface {
 }

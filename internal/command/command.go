@@ -21,3 +21,5 @@ type Command[T any] struct {
 	args        map[string]any
 	handlerFunc func(args T)
 }
+
+type CommandTable = map[string][]Loader
