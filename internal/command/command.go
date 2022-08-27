@@ -13,7 +13,7 @@ func (c Command[T]) Execute() {
 	c.handlerFunc(arg)
 }
 
-type CMD interface {
+type Executor interface {
 	Execute()
 }
 

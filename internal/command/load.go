@@ -7,23 +7,30 @@ import (
 	"github.com/akamensky/argparse"
 )
 
+// Load loads a commmand and flags into argparse
 func (c CliCommand[T]) Load(group string, parser *argparse.Parser) {
 	subparser := getSubParser(group, parser)
 
 	cmd := subparser.NewCommand(c.Name, c.Description)
-	args := getCmdArgsFromHandler(c.Handler)
+	args := getArgsFromHandler(c.Handler)
 	cmdArgs := addArgsToCmd(args, cmd)
 
-	CommandList = append(CommandList, CommandItem{
+	cmdItem := CommandItem{
 		Cmd: cmd,
 		Executor: Command[T]{
 			args:        cmdArgs,
 			handlerFunc: c.Handler,
 		},
-	})
+	}
+
+	addToCommandList(cmdItem)
 }
 
-func getCmdArgsFromHandler[T any](handlerFunc Handler[T]) map[string]string {
+func addToCommandList(cmdItem CommandItem) {
+	CommandList = append(CommandList, cmdItem)
+}
+
+func getArgsFromHandler[T any](handlerFunc Handler[T]) map[string]string {
 	var argStruct T
 	args := make(map[string]string)
 
@@ -62,4 +69,9 @@ type CliCommand[T any] struct {
 
 type Loader interface {
 	Load(string, *argparse.Parser)
+}
+
+type CommandItem struct {
+	Cmd      *argparse.Command
+	Executor Executor
 }
