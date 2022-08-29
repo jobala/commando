@@ -6,31 +6,56 @@ import (
 	"github.com/akamensky/argparse"
 )
 
-var subParsers = make(map[string]*argparse.Command)
 var CommandList = []CommandItem{}
 
-func getSubParser(group string, parser *argparse.Parser) *argparse.Command {
-	if subParser, ok := subParsers[group]; ok {
+func NewParser(name, description string) *Parser {
+	return &Parser{
+		name:        name,
+		description: description,
+		argParser:   argparse.NewParser(name, description),
+		subParsers:  make(map[string]*argparse.Command),
+	}
+}
+
+func (p *Parser) Parse(args []string) error {
+	return p.argParser.Parse(args)
+}
+
+func (p *Parser) getSubParser(group string) *argparse.Command {
+	subParser, subParserExists := p.subParsers[group]
+
+	if subParserExists {
 		return subParser
+	} else {
+		p.createSubParserFor(group)
 	}
 
+	return p.subParsers[group]
+}
+
+func (p *Parser) createSubParserFor(group string) {
 	subGroups := strings.Split(group, " ")
-	grp := subGroups[0]
 
 	var currCmd *argparse.Command
+	currGroup := subGroups[0]
 
-	if subParser, ok := subParsers[grp]; ok {
+	if subParser, ok := p.subParsers[currGroup]; ok {
 		currCmd = subParser
 	} else {
-		currCmd = parser.NewCommand(grp, "")
-		subParsers[grp] = currCmd
+		currCmd = p.argParser.NewCommand(currGroup, "")
+		p.subParsers[currGroup] = currCmd
 	}
 
 	for i := 1; i < len(subGroups); i++ {
-		grp += " " + subGroups[i]
+		currGroup += " " + subGroups[i]
 		currCmd = currCmd.NewCommand(subGroups[i], "")
-		subParsers[grp] = currCmd
+		p.subParsers[currGroup] = currCmd
 	}
+}
 
-	return subParsers[group]
+type Parser struct {
+	argParser   *argparse.Parser
+	subParsers  map[string]*argparse.Command
+	name        string
+	description string
 }

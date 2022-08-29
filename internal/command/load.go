@@ -8,8 +8,8 @@ import (
 )
 
 // Load loads a commmand and flags into argparse
-func (c CliCommand[T]) Load(group string, parser *argparse.Parser) {
-	subparser := getSubParser(group, parser)
+func (c CliCommand[T]) Load(group string, parser *Parser) {
+	subparser := parser.getSubParser(group)
 
 	cmd := subparser.NewCommand(c.Name, c.Description)
 	args := getArgsFromHandler(c.Handler)
@@ -68,7 +68,7 @@ type CliCommand[T any] struct {
 }
 
 type Loader interface {
-	Load(string, *argparse.Parser)
+	Load(string, *Parser)
 }
 
 type CommandItem struct {

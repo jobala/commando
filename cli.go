@@ -4,14 +4,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/akamensky/argparse"
 	"github.com/jobala/commando/internal/command"
 )
 
 // NewCli creates a new Cli instance
 func NewCli(name, description string) *cli {
 	return &cli{
-		parser:       argparse.NewParser(name, description),
+		parser:       command.NewParser(name, description),
 		currentGroup: "",
 	}
 }
@@ -59,6 +58,6 @@ func (c *cli) Invoke(args []string) {
 }
 
 type cli struct {
-	parser       *argparse.Parser
+	parser       *command.Parser
 	currentGroup string
 }
