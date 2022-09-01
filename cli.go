@@ -1,3 +1,5 @@
+// Package commando provides utilities for creating command groups and adding Commands
+// to a command group
 package commando
 
 import (
@@ -15,7 +17,8 @@ func NewCli(name, description string) *cli {
 	}
 }
 
-// NewCommandGroup creates a command group. Commands are added to a command group
+// NewCommandGroup adds a command group to the CLI and returns an instance of CLI
+// which is used by WithCommand to add commands to the command group.
 //
 //	NewCommandGroup("mammals cats")
 //
@@ -25,7 +28,8 @@ func (c *cli) NewCommandGroup(name string) *cli {
 	return c
 }
 
-// WithCommand adds a command to a command group
+// WithCommand adds a command to the command group to which it is chained and returns
+// the CLI instance so that more commands can be added to the command group.
 //
 //	NewCommandGroup("mammals cats").WithCommand(commando.Command("lion", Handler))
 //
@@ -35,7 +39,7 @@ func (c *cli) WithCommand(cmd command.Loader) *cli {
 	return c
 }
 
-// Command creates a command. The handlerFunc's args will be used as the command's arguments
+// Command returns a loadable command which the CLI loads during execution
 func Command[T any](cmdName string, handlerFunc func(args T)) command.Loader {
 	return command.CliCommand[T]{
 		Name:    cmdName,

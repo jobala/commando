@@ -7,7 +7,7 @@ import (
 	"github.com/akamensky/argparse"
 )
 
-// Load loads a commmand and flags into argparse
+// Load loads the command into the specified command group
 func (c CliCommand[T]) Load(group string, parser *Parser) {
 	subparser := parser.getSubParser(group)
 
@@ -47,12 +47,14 @@ func getArgsFromHandler[T any](handlerFunc Handler[T]) map[string]string {
 func addArgsToCmd(args map[string]string, cmd *argparse.Command) map[string]any {
 	cmdArgs := make(map[string]any)
 
-	for field, dataType := range args {
+	for variable, dataType := range args {
 		switch dataType {
 		case "int":
-			cmdArgs[field] = cmd.Int("", field, nil)
+			cmdArgs[variable] = cmd.Int("", variable, &argparse.Options{
+				Help: "Animal sound volume",
+			})
 		case "string":
-			cmdArgs[field] = cmd.String("", field, nil)
+			cmdArgs[variable] = cmd.String("", variable, nil)
 		}
 	}
 
