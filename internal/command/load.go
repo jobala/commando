@@ -51,7 +51,8 @@ func addArgsToCmd(args map[string]string, cmd *argparse.Command) map[string]any 
 		switch dataType {
 		case "int":
 			cmdArgs[variable] = cmd.Int("", variable, &argparse.Options{
-				Help: "Animal sound volume",
+				Required: true,
+				Help:     "Animal sound volume",
 			})
 		case "string":
 			cmdArgs[variable] = cmd.String("", variable, nil)

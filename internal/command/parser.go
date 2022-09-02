@@ -26,34 +26,46 @@ func (p *Parser) Usage(err error) string {
 }
 
 func (p *Parser) getSubParser(group string) *argparse.Command {
+	if group == "" {
+		return &p.argParser.Command
+	}
+
 	subParser, subParserExists := p.subParsers[group]
 
 	if subParserExists {
 		return subParser
 	} else {
-		p.createSubParserFor(group)
-	}
+		subGroups := strings.Split(group, " ")
 
+		_, subParserExists := p.subParsers[subGroups[0]]
+		if !subParserExists {
+			initialSubparser := p.argParser.NewCommand(subGroups[0], "")
+			p.subParsers[subGroups[0]] = initialSubparser
+		}
+
+		p.createSubParserFor(subGroups, nil, "", 0)
+	}
 	return p.subParsers[group]
 }
 
-func (p *Parser) createSubParserFor(group string) {
-	subGroups := strings.Split(group, " ")
-
-	var currCmd *argparse.Command
-	currGroup := subGroups[0]
-
-	if subParser, ok := p.subParsers[currGroup]; ok {
-		currCmd = subParser
-	} else {
-		currCmd = p.argParser.NewCommand(currGroup, "")
-		p.subParsers[currGroup] = currCmd
+func (p *Parser) createSubParserFor(groups []string, parent *argparse.Command, currGroup string, index int) {
+	if index >= len(groups) {
+		return
 	}
 
-	for i := 1; i < len(subGroups); i++ {
-		currGroup += " " + subGroups[i]
-		currCmd = currCmd.NewCommand(subGroups[i], "")
-		p.subParsers[currGroup] = currCmd
+	if currGroup == "" {
+		currGroup += groups[index]
+	} else {
+		currGroup += " " + groups[index]
+	}
+
+	subParser, subParserExists := p.subParsers[currGroup]
+	if subParserExists {
+		p.createSubParserFor(groups, subParser, currGroup, index+1)
+	} else {
+		newSubparser := parent.NewCommand(groups[index], "")
+		p.subParsers[currGroup] = newSubparser
+		p.createSubParserFor(groups, newSubparser, currGroup, index+1)
 	}
 }
 
