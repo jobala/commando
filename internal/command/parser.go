@@ -21,6 +21,10 @@ func (p *Parser) Parse(args []string) error {
 	return p.argParser.Parse(args)
 }
 
+func (p *Parser) Usage(err error) string {
+	return p.argParser.Usage(err)
+}
+
 func (p *Parser) getSubParser(group string) *argparse.Command {
 	subParser, subParserExists := p.subParsers[group]
 

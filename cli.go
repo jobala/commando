@@ -51,7 +51,7 @@ func Command[T any](cmdName string, handlerFunc func(args T)) command.Loader {
 func (c *cli) Invoke(args []string) {
 	err := c.parser.Parse(os.Args)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println(c.parser.Usage(err))
 	}
 
 	for _, cmd := range command.CommandList {
