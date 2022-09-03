@@ -24,7 +24,6 @@ Commando exposes a declarative api for grouping commands and adding commands to 
 2. `$animals vertebrates warm mammals cow --loudness <int>`
 
 
-The handler function takes a single struct as an argument and the struct fields will be used to create the command's flags. The fields **must** be public.
 
 ```go 
 cli.NewCommandGroup("vertebrates warm mammals").
@@ -47,6 +46,9 @@ type CowArgs struct {
 	Loudness int
 }
 ```
+
+The handler function takes a single struct as an argument and the struct fields will be used to create the command's flags. The fields **must** be public.
+
 
 To add another command group under `vertebrates`, do the following
 
