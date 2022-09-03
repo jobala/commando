@@ -24,6 +24,8 @@ Commando exposes a declarative api for grouping commands and adding commands to 
 2. `$animals vertebrates warm mammals cow --loudness <int>`
 
 
+You can use **--help** to show the available commands in a command group.
+`$animals --help` will list available sub command[group]s
 
 ```go 
 cli.NewCommandGroup("vertebrates warm mammals").
