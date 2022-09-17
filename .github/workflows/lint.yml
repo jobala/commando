@@ -1,0 +1,21 @@
+name: golangci-lint
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+permissions:
+  contents: read
+  pull-requests: read
+jobs:
+  golangci:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Inject private module configuration
+        run: |
+          git config --global url."https://${{ secrets.PKG_RELEASE_TOKEN }}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: v1.46.2
+          only-new-issues: true
