@@ -10,7 +10,7 @@ import (
 )
 
 // NewCli creates a new Cli instance
-func NewCli(name, description string) *cli {
+func New(name, description string) *cli {
 	return &cli{
 		parser:       command.NewParser(name, description),
 		currentGroup: "",
